@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "udn-songbook"
+version = "0.0.1"
+description = "Tools for creating and mucking about with UDN format files"
+authors = ["Stuart Sears <stuart@sjsears.com>"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/lanky/udn-tools"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+requests = "^2.28.2"
+beautifulsoup4 = "^4.11.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.1"
+pre-commit = "^3.0.4"
+black = "^23.1.0"
+flake8 = "^6.0.0"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/lanky/udn-tools/issues"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+# configuration for the pyright syntax checker/linter
+# handles warnings about variables for which we do not yet
+# know the type
+reportOptionalSubscript = false
+reportOptionalIterable = false
+reportOptionalMemberAccess = false
+reportGeneralTypeIssues = false
+
+[tool.black]
+# project-specific black setup
+line-length = 88
+target-version = ['py38', 'py39', 'py310']
+include = '\.pyi?$'
+exclude = '/(\.git|_build|build|dist|\.tox|\.venv)/'
+
+[tool.isort]
+# import-sorting plugin
+profile = "black"
