@@ -1,0 +1,11 @@
+*.swp
+*.pyo
+*.pyc
+*.db
+*.html
+*.svg
+*.log
+build
+dist
+*.egg-info
+devel/*
