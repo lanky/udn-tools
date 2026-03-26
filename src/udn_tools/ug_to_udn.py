@@ -13,7 +13,7 @@ CRD = re.compile(r"(\[ch])(.*?)(\[/ch])")
 TAB = re.compile(r"\[/?tab]")
 
 
-def parse_cmdline(argv: List[str]) -> argparse.Namespace:
+def parse_cmdline(argv: list[str]) -> argparse.Namespace:
     """
     Process commandline options
     """
@@ -78,7 +78,7 @@ def parse_ug(url: str) -> dict:
     return output
 
 
-def parse_tab(tablines: List[str]) -> List[str]:
+def parse_tab(tablines: list[str]) -> list[str]:
     """
     parses the custom format used by UG into a more UDN-like one
     - removes [/?tab] markers
@@ -122,10 +122,11 @@ def parse_tab(tablines: List[str]) -> List[str]:
     return parsed
 
 
-def main(opts: argparse.Namespace):
+def main():
     """
     main functionality
     """
+    opts = parse_cmdline(sys.argv[1:])
     blob = parse_ug(opts.url)
 
     if not opts.output:
@@ -151,4 +152,4 @@ def main(opts: argparse.Namespace):
 
 if __name__ == "__main__":
     opts = parse_cmdline(sys.argv[1:])
-    main(opts)
+    main()
