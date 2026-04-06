@@ -30,6 +30,7 @@ repository = "https://github.com/lanky/udn-tools"
 
 [project.scripts]
 ug_to_udn = "udn_tools.ug_to_udn:main"
+ug_to_crd = "udn_tools.ug_fetch:main"
 crd_to_udn = "udn_tools.parse_chordsheet:main"
 
 [dependency-groups]
