@@ -59,6 +59,7 @@ def merge_chords(chords: str, lyrics: str) -> str:
     # join the results and return them
     return "".join(merged)
 
+
 def is_chordline(line: str) -> bool:
     """Test if a matched line contains only (valid) chords and whitespace."""
 
@@ -75,9 +76,12 @@ def is_chordline(line: str) -> bool:
         return False
 
 
-def chords_to_udn(source: Path):
+def chords_to_udn(source: Path | str) -> str:
     """Parse a UG-style chordsheet into UDN."""
-    data = source.read_text().splitlines()
+    if isinstance(source, Path):
+        data = source.read_text().splitlines()
+    else:
+        data = source.splitlines()
     # General approach:
     # read line-by-line,
     # if empty, add to output

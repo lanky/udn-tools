@@ -10,6 +10,7 @@ from pathlib import Path
 
 import jmespath
 from bs4 import BeautifulSoup as bs
+from loguru import logger
 from selenium import webdriver
 
 # naive pattern matching for chords
@@ -29,7 +30,7 @@ def parse_cmdline(argv: list[str] = sys.argv[1:]) -> argparse.Namespace:
         help="Save the HTML source (for debugging)",
     )
 
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def fetch_source(url: str) -> str:
@@ -44,14 +45,13 @@ def fetch_source(url: str) -> str:
     return browser.page_source
 
 
-def extract_tab(html: str, save: bool = False) -> str | None:
+def extract_tab(soup: bs, save: bool = False) -> dict[str, str] | None:
     """Parse the html to extract the tab/chords."""
-    soup = bs(html, features="lxml")
     content = soup.find("pre", {"class": "k_vI3 KLhHx fGc1h"})
 
     meta = parse_meta(soup)
 
-    print(meta)
+    #    print(meta)
 
     if content is not None:
         if footer := content.find("div", {"class": "d8c-l"}):
@@ -66,12 +66,12 @@ def extract_tab(html: str, save: bool = False) -> str | None:
             header = "Unknown Title - Unknown Artist"
 
         lines.insert(0, header)
-        print(lines)
-
-        dest = Path(header.lower().replace(" ", "_")).with_suffix(".crd")
-
-        dest.write_text("\n".join(lines))
-        return content.text
+        #        print(lines)
+        if save:
+            dest = Path(header.lower().replace(" ", "_")).with_suffix(".crd")
+            logger.info(f"saving chords to {dest}")
+            dest.write_text("\n".join(lines))
+        return "\n".join(lines)
     return content
 
 
@@ -101,14 +101,14 @@ def main():
 
     print(f"Fetching source from {opts.source}")
 
-    src = fetch_source(opts.source)
+    src = bs(fetch_source(opts.source), features="lxml")
 
     if opts.save_source:
         Path(f"{opts.source.split('/')[-1]}.html").write_text(src)
 
     print("Attempting to parse sources")
 
-    extract_tab(src)
+    _result = extract_tab(src)
 
 
 if __name__ == "__main__":
