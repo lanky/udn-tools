@@ -32,6 +32,7 @@ repository = "https://github.com/lanky/udn-tools"
 ug_to_udn = "udn_tools.ug_to_udn:main"
 ug_to_crd = "udn_tools.ug_fetch:main"
 crd_to_udn = "udn_tools.parse_chordsheet:main"
+ug_converter = "udn_tools.ug_converter:main"
 
 [dependency-groups]
 dev = ["ipython>=9.11.0", "ruff>=0.15.7", "ty>=0.0.25"]
