@@ -11,13 +11,16 @@ from pychord import Chord
 
 logger.remove()
 
-logger.add(Path("processing.log"), format="{level} | {message}")
+logger.add(Path("processing.log"), format="{level} | {message}", level="DEBUG")
 
 # generic chord pattern. Might also generate false positives
-chordpatt = r"[A-G][adgijmnsu0-9#b+-\/\*A-G]*"
+# chordpatt = r"\b[A-G](b#)?(m|min|maj|sus|dim|aug|+|-)?(\d+)?(/[A-G][b#]?)?\b"
+chordpatt = r"\b([A-G][adgijmnsu0-9#b+-\/\*A-G]*)\b"
 CHORD = re.compile(rf"({chordpatt})")
 # used to match whole lines for chords (only chords and whitespace)
-CHORDLINE = re.compile(rf"(\s*({chordpatt})\s*)+")
+# CHORDLINE = re.compile(rf"(\s*({chordpatt})\s*)+")
+CHORDLINE = re.compile(rf"([|\s]*({chordpatt})[\s|]*)+")
+TABLINE = re.compile(r"^([A-Ga-g\|])?([|0-9ph-]{8,})")
 
 
 def parse_cmdline(argv: list[str] = sys.argv[1:]) -> argparse.Namespace:
@@ -45,7 +48,7 @@ def merge_chords(chords: str, lyrics: str) -> str:
             c = Chord(m)
             logger.debug(f"Found valid chord {c.chord}")
         except ValueError:
-            logger.error(f"Invalid chord match: {m}, skipping line.")
+            logger.debug(f"Invalid chord match: {m}, skipping line.")
             return "\n".join([chords, lyrics])
 
         # extract lyrics up to chord position
@@ -69,7 +72,7 @@ def is_chordline(line: str) -> bool:
             try:
                 _v = Chord(crd.group(1))
             except ValueError:
-                logger.error(f"line contains invalid chord match {crd.group(1)}")
+                logger.debug(f"line contains invalid chord match {crd.group(1)}")
                 return False
         return True
     else:
@@ -104,7 +107,11 @@ def chords_to_udn(source: Path | str) -> str:
             # pass through empty lines or
             logger.debug(f"appending line: '{line}'")
             parsed.append(line.lower())
+        elif TABLINE.match(line):
+            logger.debug(f"Found tab: {line}")
+            parsed.append(line)
         elif is_chordline(line):
+            logger.debug(f"chordline: {line}")
             # first, was this a valid chord match?
             # we need to inspect the next line
             try:
@@ -117,9 +124,15 @@ def chords_to_udn(source: Path | str) -> str:
                 elif is_chordline(nxt):
                     parsed.append(CHORD.sub(r"(\1)", line))
                     parsed.append(CHORD.sub(r"(\1)", nxt))
+                elif TABLINE.match(nxt):
+                    parsed.append(line)
+                    parsed.append(nxt)
                 else:
                     # assume it's lyrics
-                    parsed.append(merge_chords(line, nxt))
+                    logger.debug(f"merging chords {line} into lyrics {nxt}")
+                    result = merge_chords(line, nxt)
+                    parsed.append(result)
+                    logger.debug(f"added {result}")
             except IndexError:
                 # there is no next line
                 parsed.append(CHORD.sub(r"(\1)", line))
